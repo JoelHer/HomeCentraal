@@ -9,14 +9,11 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, Tray, Menu, nativeImage } from 'electron';
-
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-
-let tray: Tray | null = null;
 
 class AppUpdater {
   constructor() {
@@ -43,7 +40,7 @@ const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
-  //require('electron-debug')();
+  require('electron-debug')();
 }
 
 const installExtensions = async () => {
@@ -101,8 +98,6 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  mainWindow.removeMenu()
-
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
@@ -133,19 +128,6 @@ app
   .whenReady()
   .then(() => {
     createWindow();
-
-    const icon = nativeImage.createFromPath('./assets/icon.png')
-    tray = new Tray(icon)
-
-    tray.setToolTip('HomeCentraal')
-
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'HomeCentraal is running' }
-    ])
-
-    tray.setContextMenu(contextMenu)
-
-
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
