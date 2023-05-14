@@ -3,14 +3,16 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
 */
 @import '~bootstrap/dist/css/bootstrap.min.css';
+ 
+
 :root {
   --text-main: #ffffff;
   --text-secondary: #626262;
-  --background: #131417;
+  --background:  #131417;
   --button-primary: #47cf73;
   --button-secondary: #444857;
   --accent: #ffdd40;
-  --bs-card-bg: var(--button-secondary) ;
+  --bs-card-bg: var(--button-secondary)
 }
 
 body {
@@ -20,19 +22,15 @@ body {
 }
 
 .title-text {
-  background: linear-gradient(90deg, rgb(254, 220, 42) 30%, rgb(71, 207, 115) 70%);
+  background: linear-gradient(90deg, rgba(254,220,42,1) 30%, rgba(71,207,115,1) 70%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   font-weight: bolder;
 }
 
 .desc-text {
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   font-weight: lighter;
 }
 
@@ -42,4 +40,4 @@ body {
 
 .welcome-choose {
   background-color: var(--button-secondary);
-}/*# sourceMappingURL=App.css.map */
+}
