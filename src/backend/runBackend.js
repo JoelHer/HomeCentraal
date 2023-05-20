@@ -1,11 +1,5 @@
-var fs = require('fs');
-var pe = require("./plugins/PhilipsHue/main.js");
-pe.enable();
-function enablePlugins() {
-    var plugins = fs.readdirSync('src/backend/plugins');
-    for (var plugin in plugins) {
-        var p = require("./plugins/".concat(plugin, "/main.js"));
-        p.enable();
-    }
-    ;
-}
+"use strict";
+exports.__esModule = true;
+var PhilipsHue_1 = require("./modules/PhilipsHue");
+var bridge = new PhilipsHue_1.HueBridge();
+bridge.discoverBridge();
