@@ -1,7 +1,12 @@
 const axios = require('axios');
 const { json } = require('stream/consumers');
+const https = require('https');
 
-class HueBridge{
+const agent = new https.Agent({  
+    rejectUnauthorized: false
+});
+
+class HueBridgeAgent{
     id = "";
     ip = "";
     port = 443;
@@ -16,20 +21,15 @@ class HueBridge{
         this.token = undefined;
     }
 
-    //Function to set the ip of the bridge
-    setIp(ip){
-        this.ip = ip;
-    }
-
-    discoverBridge(callback = function() {}) {
-        axios.get('https://discovery.meethue.com/')
+    discover(callback = function() {}) {
+        axios.get('https://discovery.meethue.com/', { httpsAgent: agent })
         .then(response => {
             //console.log("res", response.data);
             const r = response.data;
             if (r.length > 0) {
                 //console.log("ip: ", r[0].internalipaddress);
-                this.ip = r[0].internalipaddress;
-                callback(this.ip);
+                //this.ip = r[0].internalipaddress;
+                callback(r);
             } else {
                 callback(undefined);
             }
@@ -41,5 +41,12 @@ class HueBridge{
     }
 }
 
+class HueBridge{
+    id = "";
+    ip = "";
+    port = 443;
+    username = undefined;
+    token = undefined;
+}
 
-module.exports = { HueBridge }
+module.exports = { HueBridgeAgent }

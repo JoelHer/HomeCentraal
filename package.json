@@ -47,7 +47,7 @@
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
     "make": "electron-forge make",
-    "runBackend": "tsc ./src/backend/runBackend.ts && node ./src/backend/runBackend.js"
+    "backend": "node ./src/backend/runBackend.js"
   },
   "browserslist": [],
   "prettier": {
