@@ -24,18 +24,18 @@ class HueBridgeAgent{
     discover(callback = function() {}) {
         axios.get('https://discovery.meethue.com/', { httpsAgent: agent })
         .then(response => {
-            //console.log("res", response.data);
             const r = response.data;
             if (r.length > 0) {
-                //console.log("ip: ", r[0].internalipaddress);
-                //this.ip = r[0].internalipaddress;
-                callback(r);
+                let rt = [];
+                for (let i in r) {
+                    rt.push(new HueBridge(r[i].id, r[i].internalipaddress, 443, undefined, undefined));
+                }
+                callback(rt);
             } else {
                 callback(undefined);
             }
         })
         .catch(error => {
-            // handle error
             throw error;
         });
     }
@@ -47,6 +47,57 @@ class HueBridge{
     port = 443;
     username = undefined;
     token = undefined;
+    authorized = false;
+    pollingInterval = 500;
+
+    constructor(id, ip, port, username, token){
+        this.id = id;
+        this.ip = ip;
+        this.port = port;
+        this.username = username;
+        this.token = token;
+    }
+
+    connectAuthorized(_token, callback = function() {}) {
+        if (_token == undefined || _token == "" || _token == null) {
+            throw "Token is undefined";
+        }
+        this.token = _token;
+        getData(this.token, this.ip, function(result) {
+            if (result != undefined) {
+                callback(result);
+            } else {
+                callback(undefined);
+            }
+        })
+        setInterval(() =>{
+        }, this.pollingInterval)
+    }
 }
+
+function getData(_token, _ip, callback = function() {}) {
+    if (_token == undefined || _token == "" || _token == null) {
+        throw "Token is undefined";
+    }
+    if (_ip == undefined || _ip == "" || _ip == null) {
+        throw "IP is undefined";
+    }
+    axios.get(`https://${_ip}/api/${_token}/`, { httpsAgent: agent })
+    .then(response => {
+        if (response.length = 1) {
+            try {
+                throw response.data[0].error.description;
+            } catch (e) {
+                console.log(response.data);
+            }
+        }
+    })
+
+    .catch(error => {
+        throw error;
+    });
+}
+
+
 
 module.exports = { HueBridgeAgent }
