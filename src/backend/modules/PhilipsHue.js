@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { json } = require('stream/consumers');
 const https = require('https');
+var events = require('events');
 
 const agent = new https.Agent({  
     rejectUnauthorized: false
@@ -36,6 +37,7 @@ class HueBridgeAgent{
             }
         })
         .catch(error => {
+            console.log(error)
             throw error;
         });
     }
@@ -49,6 +51,8 @@ class HueBridge{
     token = undefined;
     authorized = false;
     pollingInterval = 500;
+
+    eventEmitter = new events.EventEmitter();
 
     constructor(id, ip, port, username, token){
         this.id = id;
@@ -64,13 +68,21 @@ class HueBridge{
         }
         this.token = _token;
         getData(this.token, this.ip, function(result) {
-            if (result != undefined) {
-                callback(result);
-            } else {
+            if (result.length == 1) {
                 callback(undefined);
+            } else {
+                callback(result);
             }
         })
         setInterval(() =>{
+            getData(this.token, this.ip, function(result) {
+                if (result.length == 0) {
+                    callback(undefined);
+                } else {
+                    callback(result);
+                    console.log(result);
+                }
+            })
         }, this.pollingInterval)
     }
 }
@@ -84,11 +96,12 @@ function getData(_token, _ip, callback = function() {}) {
     }
     axios.get(`https://${_ip}/api/${_token}/`, { httpsAgent: agent })
     .then(response => {
-        if (response.length = 1) {
+        if (response.data.length = 1) {
             try {
+                eventEmitter.emit("error", response.data[0].error.description)
                 throw response.data[0].error.description;
             } catch (e) {
-                console.log(response.data);
+                callback(response.data)
             }
         }
     })

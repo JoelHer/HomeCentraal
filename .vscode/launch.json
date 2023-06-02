@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "command": "npm run backend",
+      "name": "Run npm backend",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+
+    {
       "name": "Electron: Main",
       "type": "node",
       "request": "launch",
