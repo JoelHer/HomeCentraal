@@ -50,7 +50,7 @@ class HueBridge{
     username = undefined;
     token = undefined;
     authorized = false;
-    pollingInterval = 500;
+    pollingInterval = 2000;
 
     eventEmitter = new events.EventEmitter();
 
