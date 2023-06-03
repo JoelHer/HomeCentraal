@@ -2,6 +2,7 @@ const axios = require('axios');
 const { json } = require('stream/consumers');
 const https = require('https');
 var events = require('events');
+var SSDP = require('node-ssdp').Client
 
 const agent = new https.Agent({  
     rejectUnauthorized: false
@@ -21,25 +22,61 @@ class HueBridgeAgent{
         this.username = undefined;
         this.token = undefined;
     }
-
-    discover(callback = function() {}) {
-        axios.get('https://discovery.meethue.com/', { httpsAgent: agent })
-        .then(response => {
-            const r = response.data;
-            if (r.length > 0) {
-                let rt = [];
-                for (let i in r) {
-                    rt.push(new HueBridge(r[i].id, r[i].internalipaddress, 443, undefined, undefined));
-                }
-                callback(rt);
-            } else {
-                callback(undefined);
+    
+    discoverHueBridges() {
+        return new Promise((resolve, reject) => {
+          const ssdp = new SSDP();
+          const bridges = [];
+      
+          ssdp.on('response', (headers, statusCode, rinfo) => {
+            // Check if the response matches the Philips Hue bridge service type
+            if (headers.ST === 'urn:schemas-upnp-org:device:Basic:1') {
+              // Extract the bridge's IP address from the response
+              const ipAddress = rinfo;
+              console.log(rinfo)
+      
+              // Add the bridge's IP address to the list
+              bridges.push(ipAddress);
             }
+          });
+      
+          // Start the SSDP server to listen for SSDP responses
+          ssdp.start();
+      
+          // Send an SSDP search request for the Philips Hue bridge service type
+          ssdp.search('urn:schemas-upnp-org:device:Basic:1');
+      
+          // Set a timeout to stop the discovery process after a specified duration (e.g., 5 seconds)
+          const timeout = setTimeout(() => {
+            ssdp.stop();
+            resolve(bridges); // Return the discovered bridges
+          }, 5000);
+      
+          // Handle errors
+          ssdp.on('error', (err) => {
+            clearTimeout(timeout);
+            ssdp.stop();
+            reject(err);
+          });
         })
-        .catch(error => {
-            console.log(error)
-            throw error;
+        .catch((err) => {
+          console.error('Error discovering bridges:', err);
+          return []; // Return an empty array in case of an error
         });
+      }
+      
+
+    createManually(_ip, _username, _token) {
+        if (_ip == undefined || _ip == "" || _ip == null) {
+            throw "IP is undefined";
+        }
+        if (_username == undefined || _username == "" || _username == null) {
+            throw "Username is undefined";
+        }
+        if (_token == undefined || _token == "" || _token == null) {
+            throw "Token is undefined";
+        }
+        return new HueBridge("", _ip, 443, _username, _token);
     }
 }
 
@@ -77,10 +114,10 @@ class HueBridge{
         setInterval(() =>{
             getData(this.token, this.ip, function(result) {
                 if (result.length == 0) {
-                    callback(undefined);
+                    //callback(undefined);
                 } else {
-                    callback(result);
-                    console.log(result);
+                    //callback(result);
+                    //console.log(result);
                 }
             })
         }, this.pollingInterval)
